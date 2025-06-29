@@ -28,6 +28,7 @@ export const useOCPPConnection = () => {
   const wsRef = useRef<WebSocket | null>(null);
   const messageIdRef = useRef(1);
   const transactionIdRef = useRef(1000);
+  const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const addMessage = useCallback((direction: 'sent' | 'received', messageType: string, payload: any) => {
     const message: OCPPMessage = {
@@ -76,12 +77,8 @@ export const useOCPPConnection = () => {
       });
       
       // Start heartbeat
-      const heartbeatInterval = setInterval(() => {
-        if (connectionStatus === 'connected') {
-          sendMessage('Heartbeat', {});
-        } else {
-          clearInterval(heartbeatInterval);
-        }
+      heartbeatIntervalRef.current = setInterval(() => {
+        sendMessage('Heartbeat', {});
       }, 30000);
     }, 2000);
   }, [connectionStatus, sendMessage, addMessage]);
@@ -92,6 +89,10 @@ export const useOCPPConnection = () => {
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
+    }
+    if (heartbeatIntervalRef.current) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
     }
   }, [addMessage]);
 

@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef } from 'react';
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';
@@ -43,6 +42,7 @@ export const useOCPPConnection = () => {
   ]);
   const [firmwareStatus, setFirmwareStatus] = useState<FirmwareStatus>({ status: 'Idle' });
   const [messages, setMessages] = useState<OCPPMessage[]>([]);
+  const [currentUrl, setCurrentUrl] = useState<string>('');
   const wsRef = useRef<WebSocket | null>(null);
   const messageIdRef = useRef(1);
   const transactionIdRef = useRef(1000);
@@ -75,11 +75,12 @@ export const useOCPPConnection = () => {
     }, 500 + Math.random() * 1000);
   }, [addMessage]);
 
-  const connect = useCallback(() => {
+  const connect = useCallback((url: string) => {
     if (connectionStatus !== 'disconnected') return;
     
     setConnectionStatus('connecting');
-    addMessage('sent', 'Connection', { url: 'wss://central-station.example.com/ocpp/CP001' });
+    setCurrentUrl(url);
+    addMessage('sent', 'Connection', { url });
     
     setTimeout(() => {
       setConnectionStatus('connected');
@@ -308,6 +309,7 @@ export const useOCPPConnection = () => {
     connectors,
     firmwareStatus,
     messages,
+    currentUrl,
     connect,
     disconnect,
     startTransaction,

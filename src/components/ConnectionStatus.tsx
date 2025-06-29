@@ -1,14 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Wifi, WifiOff, Loader2, Heart } from 'lucide-react';
 import { ConnectionStatus as ConnectionStatusType } from '../hooks/useOCPPConnection';
 
 interface ConnectionStatusProps {
   status: ConnectionStatusType;
-  onConnect: () => void;
+  onConnect: (url: string) => void;
   onDisconnect: () => void;
   onHeartbeat: () => void;
 }
@@ -19,6 +20,8 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
   onDisconnect,
   onHeartbeat
 }) => {
+  const [centralStationUrl, setCentralStationUrl] = useState('wss://central-station.example.com/ocpp/CP001');
+
   const getStatusColor = () => {
     switch (status) {
       case 'connected': return 'bg-green-500';
@@ -48,10 +51,24 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Central Station URL</label>
+          <Input
+            value={centralStationUrl}
+            onChange={(e) => setCentralStationUrl(e.target.value)}
+            placeholder="Enter central station WebSocket URL"
+            disabled={status === 'connecting' || status === 'connected'}
+          />
+        </div>
+        
         <div className="flex gap-2">
           {status === 'disconnected' && (
-            <Button onClick={onConnect} className="bg-green-600 hover:bg-green-700">
+            <Button 
+              onClick={() => onConnect(centralStationUrl)} 
+              className="bg-green-600 hover:bg-green-700"
+              disabled={!centralStationUrl.trim()}
+            >
               Connect to Central Station
             </Button>
           )}
@@ -73,8 +90,9 @@ const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
             </Button>
           )}
         </div>
-        <div className="mt-4 text-sm text-muted-foreground">
-          <p><strong>Central Station URL:</strong> wss://central-station.example.com/ocpp/CP001</p>
+        
+        <div className="text-sm text-muted-foreground">
+          <p><strong>Current URL:</strong> {centralStationUrl}</p>
           <p><strong>Protocol:</strong> OCPP 1.6J over WebSocket</p>
         </div>
       </CardContent>

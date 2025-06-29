@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,10 +35,6 @@ const ChargingStation = () => {
     serialNumber: 'FC-2024-001',
     connectorCount: 2
   });
-
-  useEffect(() => {
-    connect();
-  }, [connect]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
